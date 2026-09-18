@@ -13,50 +13,5 @@
     {% endif %}
 </div>
 {{ wtf.quick_form(form) }}
-<div class="container mt-4">
-    <h1>Relação de Usuários cadastrados</h1>
-    <p>Quantidade: {{ totalu }}</p>
-    <table class="table mt-3">
-        <thead>
-            <tr>
-                <th>Nome do usuário</th>
-                <th>Função</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in usuarios %}
-                <tr>
-                    <td>{{ u.username }}</td>
-                    <td>{{ u.role.name if u.role else 'Sem função'}}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h1>Relação de funções cadastradas</h1>
-    <p>Quantidade: {{ totalf }}</p>
-    <table class="table mt-3">
-        <thead>
-            <tr>
-                <th>Funções</th>
-                <th>Usuários</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for f in funcoes %}
-                <tr>
-                    <td>{{ f.name }}</td>
-                    <td>
-                        <ol class="list-unstyled">
-                            {% for u in f.users %}
-                                <li>{{ loop.index }}. {{ u.username }}</li>
-                            {% else %}
-                                <li class="text-muted">Nenhum usuário</li>
-                            {% endfor %}
-                        </ol>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 {% endblock %}
