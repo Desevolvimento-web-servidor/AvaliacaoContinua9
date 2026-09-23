@@ -8,10 +8,29 @@
     <h1>Olá, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
     {% if not known %}
     <p>Prazer em conhecê-lo!</p>
+    <p>E-mail enviado para o Administrador do sistema, notificando o cadastro de um novo usuário.</p>
     {% else %}
     <p>Feliz em vê-lo novamente!</p>
     {% endif %}
 </div>
 {{ wtf.quick_form(form) }}
+<div class="container mt-4">
+    <h1>Relação de Usuários cadastrados</h1>
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>Nome do usuário</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+                <tr>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.role.name if u.role else 'Sem função'}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

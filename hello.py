@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField,BooleanField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -30,12 +30,12 @@ moment = Moment(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-def send_simple_message(nome):
+def send_simple_message(nome, destinatarios):
   	return requests.post(
   		"https://api.mailgun.net/v3/sandbox39e04778c9a543619af56061c9ef7855.mailgun.org/messages",
   		auth=("api", os.getenv('API_KEY', 'API_KEY')),
   		data={"from": "Mailgun Sandbox <postmaster@sandbox39e04778c9a543619af56061c9ef7855.mailgun.org>",
-			"to": "Vinicius Ruza <ruza.vinicius@aluno.ifsp.edu.br>, Fabio Teixeira <flaskaulasweb@zohomail.com>",
+			"to": destinatarios,
   			"subject": "Avaliação Continua:E-mail",
   			"text": f"Nome: Vinicius Ruza Magalhães Prontuário: PT3035921 Conteúdo Digitado: {nome}"})
 
@@ -61,6 +61,7 @@ class User(db.Model):
 
 class NameForm(FlaskForm):
     name = StringField('What is your name?', validators=[DataRequired()])
+    emailParaProfessor=BooleanField("Deseja enviar e-mail para flaskaulasweb@zohomail.com?", default=False)
     submit = SubmitField('Submit')
 
 
@@ -81,16 +82,20 @@ def internal_server_error(e):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    usuarios = User.query.all()
 
     form = NameForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.name.data).first()
-        resposta=send_simple_message(form.name.data)
+        destinatarios=["Vinicius Ruza <ruza.vinicius@aluno.ifsp.edu.br>"]
+        if(form.emailParaProfessor.data==True):
+            destinatarios=["Vinicius Ruza <ruza.vinicius@aluno.ifsp.edu.br>, Fabio Teixeira <flaskaulasweb@zohomail.com>"]
+            print("Email enviado para as duas contas")
+        resposta=send_simple_message(form.name.data, destinatarios)
         print("STATUS MAILGUN:", resposta.status_code)
         print("RESPOSTA MAILGUN:", resposta.text)
 
-
+        user = User.query.filter_by(username=form.name.data).first()
         if user is None:
             user_role = Role.query.filter_by(name = "User").first()
             user = User(username=form.name.data, role=user_role)
@@ -103,4 +108,4 @@ def index():
         return redirect(url_for('index'))
 
     return render_template('index.html', form=form, name=session.get('name'),
-                           known=session.get('known', False))
+                           known=session.get('known', False), usuarios=usuarios)
